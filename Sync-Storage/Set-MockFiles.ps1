@@ -4,9 +4,14 @@ function Set-MockFiles {
     param (
         [int]$Stop=10,
         [int]$Start=0,
-        [string]$Path=".\tmp"
+        [string]$Path=".\tmp",
+        [int]$TrailDecimal=-1
     )
     $range = ($Stop-$Start)
+
+    if ($TrailDecimal -lt 0) {
+        $TrailDecimal = $(([string]$Stop).length)
+    }
     
     # reserve new path for generating file if not exists
     New-Item -ItemType Directory -Force -Path $Path
@@ -15,7 +20,7 @@ function Set-MockFiles {
     $files = [string[]]::new($range)
     
     for ($i = 0; $i -lt $range; $i++) {
-        $files[$i] = "{1}\{0:d$(([string]$Stop).length)}.txt" -f ($i+$Start), $Path
+        $files[$i] = "{1}\{0:d$TrailDecimal}.txt" -f ($i+$Start), $Path
         "File No. {0}" -f ($i+$Start) | Out-File -FilePath $files[$i]
     }
     
