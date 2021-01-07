@@ -4,19 +4,20 @@ function Sync-Storage {
         [Parameter(Mandatory=$True)]
         [string]$Source,
 
-        [Parameter(Mandatory=$True)]
-        [string]$Destination,
+        [string]$Destination=(Join-Path -Path "$HOME" -ChildPath "storage-backup/"),
 
-        [string]$lutPath="test.csv"
+        [string]$ReferTo=".reflist.csv"
     )    
     
     $currentScan = {} | Select-Object Path,Hash;
+    $ReferencePath = Join-Path -Path $Destination -ChildPath $ReferTo
 
     # Load file, or create file
-    if (Test-Path $lutPath) {
-        $currentScan = Import-Csv $lutPath -Delimiter "`t"
+    if (Test-Path $ReferencePath) {
+        $currentScan = Import-Csv $ReferencePath -Delimiter "`t"
     } else {
-        $currentScan | Export-Csv $lutPath -Delimiter "`t" -NoTypeinformation
+        New-Item -Path $ReferencePath -Force
+        $currentScan | Export-Csv $ReferencePath -Delimiter "`t" -NoTypeinformation
     }
 
     # scan directory
@@ -35,7 +36,7 @@ function Sync-Storage {
     # $destTable | ForEach-Object { Copy-Item -Source $_.Key -Destination $_.Value } #-PassThru | Where-Object { $_ -is [system.io.fileinfo] }
     
     # update list
-    $tobeCopied | Export-Csv $lutPath -Delimiter "`t" -NoTypeinformation -Append
+    $tobeCopied | Export-Csv $ReferencePath -Delimiter "`t" -NoTypeinformation -Append
 
     # return $destTable
 }
