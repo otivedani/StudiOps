@@ -9,7 +9,15 @@ BeforeAll {
 
 Describe -Tags "Njajal" "Sync-Storage" {
     
-    It "yagitudeh" {
+    It "should run with default param" {
+        $filesBefore = Set-MockFiles -Stop 5 -Start 0 -Path $srcDir -TrailDecimal 5
+        Sync-Storage -Source $srcDir
+        Join-Path -Path "$HOME" -ChildPath "storage-backup/00001.txt" | Test-Path | Should -BeTrue
+        Join-Path -Path "$HOME" -ChildPath "storage-backup/.reflist.csv" | Test-Path | Should -BeTrue
+        Remove-MockFiles $filesBefore
+    }
+
+    It "should handle files in updated dir scenario" {
         $filesBefore = Set-MockFiles -Stop 5 -Start 0 -Path $srcDir -TrailDecimal 3
         Sync-Storage -Source $srcDir -Destination $dstDir
         Start-Sleep 5
@@ -25,12 +33,11 @@ Describe -Tags "Njajal" "Sync-Storage" {
 
         Remove-MockFiles $filesBefore
         Remove-MockFiles $filesAfter
-        Remove-Item $(Split-Path -Parent $srcDir) -Force -Recurse 
-        Remove-Item $(Split-Path -Parent $dstDir) -Force -Recurse
-        Remove-Item "$HOME\storage-backup\.reflist.csv"
+        Remove-Item (Join-Path -Path $dstDir -ChildPath "./.reflist.csv")
+        Remove-Item (Split-Path -Parent $srcDir) -Force -Recurse 
+        Remove-Item (Split-Path -Parent $dstDir) -Force -Recurse
     }
-    
-    
+
 }
 
 AfterAll {
